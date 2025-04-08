@@ -1,0 +1,103 @@
+<!-- Template que renderiza el juego. Recibe los siguientes parametros:
+    * "preguntas": lista de documentos que contienen la informacion de las preguntas, de acuerdo al método "to_dict()"
+                   de "Trivia".
+    * "guardable": booleano que indica si a este quiz se le da la opcion de guardado (True), o no (False).
+ -->
+{% extends "base_with_navbar.html" %}
+
+{% block title %}
+    Audio Quiz
+{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        #question-container, #next-button { display: none; }
+        .answer { display: block; margin: 10px auto; padding: 10px; width: 200px; cursor: pointer; border: 1px solid #ccc; }
+        .correct { background-color: green; color: white; }
+        .incorrect { background-color: red; color: white; }
+        #audio-cover { width: 300px; height: 300px; object-fit: cover; margin-top: 20px; }
+        #timer { font-size: 20px; margin-top: 10px; font-weight: bold; }
+		iframe { display: none; } /* Hide the video */
+        iframe { display: none; }
+		#loading { font-size: 18px; margin-top: 20px; }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 5px solid lightgray;
+            border-top-color: black;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1 id="title-content" class="my-4"></h1>
+
+    <img id="audio-cover" class="mx-auto" style="display: none;" src=" {{ url_for('static', filename='youtube.svg') }}" alt="Audio Cover">
+    <p id="timer"></p>  <!-- Timer Display -->
+
+	<div id="loading" style="display: none;">
+        <p id="mensaje-carga"></p>
+        <div class="spinner"></div>
+    </div>
+
+
+    <!-- Hidden YouTube Player -->
+    <div id="player"></div>
+
+    <div id="question-container">
+        <h2 id="question" class="my-2"></h2>
+        <div id="answers" class="my-4"></div>
+        <h3 class="my-2"> Esta pregunta suma <span id="puntuacion-pregunta"></span> puntos</h3>
+        <button id="next-button" onclick="nextRound()">¡Siguiente pregunta!</button>
+    </div>
+
+    <div id="puntuacion-container">
+        <p> Puntuación Total: <span id="puntuacion">0</span></p>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="quizModal" tabindex="-1" aria-labelledby="quizModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="quizModalLabel">Respuestas Correctas</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="questionList">
+                    <!-- Aqui se insertan las preguntas y respuestas en JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-primary" role="button" href= {{ url_for('mostrar_ediciones') }}>Volver al Inicio</a>
+                    <!-- Solo renderizamos el boton de guardar si es la primera vez que se juega -->
+                    {% if guardable and "_id" in preguntas %}
+                        <button id="guardar-info" type="button" class="btn btn-success" onclick="mandarRespuestas()">Guardar Concurso</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script id="quiz-data" type="application/json" charset="utf-8">
+        {{ preguntas|tojson|safe }}
+    </script>
+
+
+    <script>
+      const csrfToken = "{{ csrf_token() }}";
+    </script>
+
+    <!-- Cargamos el codigo JavaScript para manejar el juego -->
+    <script src="../static/video.js"></script>
+{% endblock %}

@@ -1,0 +1,88 @@
+<!-- Template que muestra la informacion general de las ediciones. Por cada edicion, muestra los participantes
+ y un resumen de su informacion. Recibe los siguientes parametros:
+  * "pagina": numero de pagina actual.
+  * "pagination": objeto paginacion para renderizar la barra de resultados.
+  * "festivales": informacion del concurso, siguiendo el mismo esquema de los documentos de
+     la base de datos. Asume que estan los campos "anyo", "ciudad", "pais", "fecha" y "concursantes"
+ -->
+{% extends "base_with_navbar.html" %}
+{% from "macro_mostrar_actuacion.html" import mostrar_actuacion %}
+
+{% block title %}
+Ediciones - Pagina {{ pagina }}
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+        .flag-image {
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            transition: border-color 0.3s ease;
+        }
+
+        .flag-image:hover {
+            border-color: rgba(0, 0, 0, 0.6);
+        }
+
+        .country-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+</style>
+{% endblock %}
+
+{% block content %}
+        {% for contest_data in festivales %}
+        <div class="container-fluid mt-4">
+            <a href="{{ url_for('mostrar_festival', anyo=contest_data['anyo']) }} ">
+                <h1 class="text-center">Eurovisión {{ contest_data['anyo'] }}</h1>
+            </a>
+            <!-- Detalles del Concurso -->
+            <div class="row mt-4 text-center">
+                <div class="col-12">
+                    <h3>Ciudad del Concurso: {{ contest_data['ciudad'] }}</h3>
+                </div>
+            </div>
+
+            <div class="row mt-4 text-center">
+                <div class="col-6">
+                    <h5><strong>País Anfitrión:</strong> {{ contest_data['pais'] }}</h5>
+                </div>
+                <div class="col-6 text-center">
+                    <h5><strong>Fecha:</strong> {{ contest_data['fecha'].strftime('%d %B %Y') }}</h5>
+                </div>
+            </div>
+            <!-- Lista de Concursantes -->
+            <div class="row">
+                {% for concursante in contest_data['concursantes'] %}
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <a href="{{ url_for('mostrar_actuaciones_pais', id_pais=concursante['id_pais']) }}" class="country-link">
+                                {% if concursante['id_pais'] != "yu"  %}
+                                <img src="https://flagcdn.com/{{ concursante['id_pais'] }}.svg" class="card-img-top flag-image" alt="{{ concursante['pais'] }}">
+                                {% else %}
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Flag_of_Yugoslavia_%281918%E2%80%931941%29.svg" class="card-img-top flat-image">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ concursante['pais'] }}</h5>
+                                </div>
+                            </a>
+                            <div class="card-body">
+                                <p class="card-text"><strong>Artista:</strong> {{ concursante['artista'] }}</p>
+                                <p class="card-text"><strong>Canción:</strong> {{ concursante['cancion'] }}</p>
+                                <p class="card-text"><strong>Posición:</strong> {{ concursante['resultado'] }}</p>
+                                <p class="card-text"><strong>Puntuación:</strong> {{ concursante['puntuacion'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% endfor %}
+
+        {{ pagination|safe }}
+
+{% endblock %}

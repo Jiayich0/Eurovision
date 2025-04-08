@@ -1,0 +1,38 @@
+<!-- Template que muestra los quizzes de eurovision que se han creado.
+    Recibe los siguientes parametros:
+  * "pagina": numero de pagina actual.
+  * "pagination": objeto paginacion para renderizar la barra de resultados.
+  * "quizes": lista de diccionarios, que deben contener las siguientes claves:
+    - '_id': nombre del quiz. Es unico y sirve para identificarlo en mongo.
+    - 'creacion': objeto datetime.datetime que representa la fecha en la que se creo.
+ -->
+{% extends "base_with_navbar.html" %}
+
+{% block title %}
+Quizzes
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-4">Quizzes Eurovision</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <ul class="list-group shadow-sm">
+                {% for quiz in quizzes %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href=" {{ url_for('jugar_quiz_personalizado', nombre_quiz=quiz['_id']) }}">
+                            <div>
+                                <strong>ID:</strong> {{ quiz['_id'] }}
+                            </div>
+                        </a>
+                            <span class="badge bg-primary rounded-pill">
+                                {{ quiz['creacion'].strftime('%d/%m/%Y %H:%M') }}
+                            </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

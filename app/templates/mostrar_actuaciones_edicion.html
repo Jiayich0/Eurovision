@@ -1,0 +1,88 @@
+<!-- Template que muestra las actuaciones de una edicion. Debe recibir los
+ siguientes parametros:
+ * "anyo": anyo en el que se llevo a cabo esa participacion
+ * "pais_organizador": pais que organizo la edicion.
+ * "ciudad": ciudad donde se celebro la edicion.
+ * "participaciones": lista de diccionarios los cuales contienen las siguientes claves:
+    - "pais": pais del concursante.
+    - "artista": artista que interpreto la cancion.
+    - "cancion": cancion interpretada.
+    - "resultado": posicion en la que quedo en ese festival.
+    - "puntuacion": puntuacion total.
+    - "url_youtube": url del video de youtube con la actuacion.
+ -->
+{% extends "base_with_navbar.html" %}
+{% from "macro_mostrar_actuacion.html" import mostrar_actuacion %}
+
+{% block title %}
+Eurovision {{ anyo }}: {{ ciudad }}, {{ pais_organizador }} - Página {{ pagina }}
+{% endblock %}
+
+{% block content %}
+    <h1 class="text-center mb-4">Eurovision {{ anyo }}</h1>
+
+    <div class="row gx-2 gy-4">
+        {% for concursante in participaciones %}
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100 mx-3">
+
+                    <!-- Small, consistent-sized flag image -->
+                    <div class="text-center mt-3">
+                        {% if concursante['id_pais'] != "yu" %}
+                            <a href="{{ url_for('mostrar_actuaciones_pais', id_pais=concursante['id_pais']) }}">
+                                <img src="https://flagcdn.com/{{ concursante['id_pais'] }}.svg"
+                                     alt="{{ concursante['pais'] }}"
+                                     class="img-fluid border border-dark border-1 mb-2"
+                                     style="max-height: 80px; width: auto;">
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('mostrar_actuaciones_pais', id_pais=concursante['id_pais']) }}">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Flag_of_Yugoslavia_%281918%E2%80%931941%29.svg"
+                                     alt="Yugoslavia"
+                                     class="img-fluid border border-dark border-1 mb-2"
+                                     style="max-height: 80px; width: auto;">
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body text-center">
+                        <h5 class="card-title">
+                            <a href="{{ url_for('mostrar_actuaciones_pais', id_pais=concursante['id_pais']) }}"
+                               class="text-decoration-none text-dark fw-bold">
+                                {{ concursante["pais"] }}
+                            </a>
+                        </h5>
+                        <h6 class="text-primary mb-2">{{ concursante["cancion"] }}</h6>
+                        <p class="text-muted mb-1">por {{ concursante["artista"] }}</p>
+
+                        <div class="row text-center my-3">
+                            <div class="col-6">
+                                <div class="p-2 bg-light rounded border">
+                                    <small class="text-muted">Puesto</small>
+                                    <div class="fw-semibold">{{ concursante["resultado"] }}</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-2 bg-light rounded border">
+                                    <small class="text-muted">Puntuación</small>
+                                    <div class="fw-semibold">{{ concursante["puntuacion"] }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- YouTube Video -->
+                        <div class="ratio ratio-16x9">
+                            <iframe
+                                src="{{ concursante['url_youtube'] }}"
+                                title="Actuación de {{ concursante['artista'] }}"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

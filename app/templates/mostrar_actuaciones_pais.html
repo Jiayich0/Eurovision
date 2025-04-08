@@ -1,0 +1,33 @@
+<!-- Template que muestra las actuaciones de un pais, dada una paginacion. Debe recibir los
+ siguientes parametros:
+ * "pagina": numero de pagina actual.
+ * "pagination": objeto paginacion que se genera con el metodo "render_pagination" del modulo render_utils.
+ * "pais": nombre del pais (tiene que ser el nombre, no el id)
+ * "participaciones": lista de diccionarios los cuales contienen las siguientes claves:
+    - "anyo": anyo en el que se celebro la edicion.
+    - "pais_organizador": pais que organizo la edicion.
+    - "ciudad": ciudad donde se celebro la edicion.
+    - "artista": artista que interpreto la cancion.
+    - "cancion": cancion interpretada.
+    - "resultado": posicion en la que quedo en ese festival.
+    - "puntuacion": puntuacion total.
+    - "url_youtube": url del video de youtube con la actuacion.
+ -->
+{% extends "base_with_navbar.html" %}
+{% from "macro_mostrar_actuacion.html" import mostrar_actuacion %}
+
+{% block title %}
+Actuaciones de {{ pais }} - Pagina {{ pagina }}
+{% endblock %}
+
+{% block content %}
+    <h1 class="text-center mb-4"> Lista de Participaciones de {{ pais }} </h1>
+    <div class="mt-4 mb-4 container-fluid ">
+        {% for participacion in participaciones %}
+            {{ mostrar_actuacion(participacion, True) }}
+        {% endfor %}
+    </div>
+
+    {{ pagination|safe }}
+
+{% endblock %}

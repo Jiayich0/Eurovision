@@ -1,0 +1,155 @@
+<!-- Componente de barra de navegacion. Cogemos el template base y anyadimos la barra de navegacion  -->
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Raleway:wght@600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #fdfbfb, #f8f9fa, #fef5e7, #e3fdfd, #fceff7);
+            background-size: cover;
+        }
+
+        @keyframes pastelBG {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .navbar-custom {
+            background: linear-gradient(90deg, #ff4e50, #fc913a, #f9d423, #eae374, #a1c4fd, #c2e9fb);
+            background-size: 300% 300%;
+            animation: gradientBG 8s infinite alternate ease-in-out;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            padding: 12px 20px;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .nav-link {
+            font-weight: bold;
+            color: black;
+            transition: all 0.3s ease-in-out;
+            border-radius: 10px;
+            padding: 10px 15px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: blue;
+            transform: scale(1.1);
+        }
+
+        .navbar-brand {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            font-family: 'Poppins'; /* Modern font */
+            color: #333;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); /* Light text shadow */
+            transition: text-shadow 0.3s ease;
+        }
+
+        .navbar-brand img {
+            height: 50px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .navbar-brand img:hover {
+            transform: rotate(-5deg) scale(1.05);
+        }
+
+        .navbar-brand:hover {
+            text-shadow: 0 0 6px #ff8c00, 0 0 15px #ff69b4; /* Soft glowing effect */
+        }
+
+
+        .btn-custom {
+            background: linear-gradient(135deg, #ff0080, #ff8c00);
+            color: white;
+            border-radius: 20px;
+            padding: 8px 18px;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .btn-custom:hover {
+            background: linear-gradient(135deg, #ff8c00, #ff0080);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 991px) {
+            .navbar-custom {
+                border-radius: 0;
+            }
+        }
+    </style>
+{% endblock %}
+
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-light navbar-custom mt-3 mx-3">
+    <div class="container-fluid">
+    <!-- Logo -->
+    <div class="row w-100">
+        <div class="col-3 d-flex justify-content-start">
+            <a class="navbar-brand" href="#">
+                <img src="{{ url_for('static', filename='eurovision.svg') }}" alt="Eurovision">
+            </a>
+        </div>
+
+        <div class="col-6 d-flex justify-content-center">
+            <a class="navbar-brand">
+                <span>EUCMVision</span>
+            </a>
+        </div>
+
+            <div class="col-3 d-flex justify-content-end">
+
+                <!-- Menu Toggle Button (for mobile) -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+    </div>
+
+    <div class="row w-100">
+        <div class="col-10 offset-1 text-center d-flex justify-content-center">
+
+            <!-- Navbar Content -->
+            <div class="collapse navbar-collapse mx-3 mt-2" id="navbarNav">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href= {{ url_for('mostrar_ediciones') }}>Ediciones</a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href= {{ url_for('jugar_quiz') }}>¡Juega a un Quiz!</a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href= {{ url_for('generar_quiz') }}>¡Crea tu propio Quizz!</a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href= {{ url_for('mostrar_quizzes') }}>Lista de Quizs</a>
+                            </li>
+                        </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock %}

@@ -1,0 +1,56 @@
+<!-- Macro para mostrar una actuacion -->
+<!-- Recibe como parametro:
+    * Un diccionario con la siguiente informacion:
+        - "anyo": anyo en el que se celebro la edicion.
+        - "pais_organizador": pais que organizo la edicion.
+        - "ciudad": ciudad donde se celebro la edicion.
+        - "artista": artista que interpreto la cancion.
+        - "cancion": cancion interpretada.
+        - "resultado": posicion en la que quedo en ese festival.
+        - "puntuacion": puntuacion total.
+        - "url_youtube": url del video de youtube con la actuacion.
+    * Un booleano "con_edicion" para mostrar la cabecera de anyo, ciudad y pais organizador.
+      Si es False, entonces no es necesaria esa informacion en el diccionario anterior.
+
+  Debe estar incluido en un grid de Boostrap para que se renderice correctamente. -->
+{% macro mostrar_actuacion(informacion, con_edicion) %}
+<div class="container my-5">
+
+    {% if con_edicion %}
+        <div class="text-center mb-4">
+            <h1 class="fw-bold">Edición {{ informacion["anyo"] }}: {{ informacion["ciudad"] }}, {{ informacion["pais_organizador"] }}</h1>
+        </div>
+    {% endif %}
+    <div class="text-center mb-3">
+        <h2 class="text-primary">{{ informacion["cancion"] }}</h2>
+        <h4 class="text-muted">por {{ informacion["artista"] }}</h4>
+    </div>
+
+    <div class="row text-center my-4">
+        <div class="col-md-6 mb-3">
+            <div class="p-3 border rounded shadow-sm bg-light">
+                <h5 class="mb-1">Puesto</h5>
+                <h4 class="fw-semibold">{{ informacion["resultado"] }}</h4>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="p-3 border rounded shadow-sm bg-light">
+                <h5 class="mb-1">Puntuación</h5>
+                <h4 class="fw-semibold">{{ informacion["puntuacion"] }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <div class="ratio ratio-16x9">
+            <iframe
+                src="{{ informacion['url_youtube'] }}"
+                title="Actuación de {{ informacion['artista'] }}"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+
+</div>
+{% endmacro %}
