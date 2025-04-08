@@ -25,13 +25,21 @@ def mostrar_ediciones():
     elementos_por_pagina = 5
 
     # AQUI VA VUESTRO CODIGO
+    total_elementos = mongo.db.festivales.count_documents({})
+    skip = (pagina - 1) * elementos_por_pagina # Paginacion: empeiza en el 0, 5, 10, etc
+    festivales = list(
+        mongo.db["festivales"]
+        .find({}, {"anyo": 1, "ciudad": 1, "pais": 1, "fecha": 1, "concursantes": 1}) # trae solo los elemntos/columnas seleccionadas
+        .sort("anyo", -1)               # Primero los ordena y luego hace el skip y limite por pagina
+        .skip(skip)                     # Empiezan desde x pagina, cada 5 (paginate)
+        .limit(elementos_por_pagina)    # 5 por pagina (paginate)
+    )
 
     # Descomentad cuando cargueis la informacion
-    # paginacion = render_pagination(pagina, elementos_por_pagina, total_elementos, 'mostrar_ediciones')
+    paginacion = render_pagination(pagina, elementos_por_pagina, total_elementos, 'mostrar_ediciones')
 
-    # return render_template("mostrar_ediciones.html", festivales=festivales,
-    #                        pagination=paginacion, pagina=pagina)
-    abort(404)
+    return render_template("mostrar_ediciones.html", festivales=festivales,
+                           pagination=paginacion, pagina=pagina)
 
 
 @app.route("/edicion/<int:anyo>")
@@ -39,7 +47,18 @@ def mostrar_festival(anyo: int):
     # Mostrar la lista de ediciones, dado un anyo.
     # Devuelve un error 404 si no se encuentra presente ese anyo.
     # Como respuesta, renderiza el template "mostrar_actuaciones_edicion.html"
-    abort(404)
+    festival = mongo.db["festivales"].find_one({"anyo": anyo})
+
+    if not festival:
+        abort(404)
+
+    return render_template(
+        "mostrar_actuaciones_edicion.html",
+        anyo=festival["anyo"],
+        ciudad=festival["ciudad"],
+        pais_organizador=festival["pais"],
+        participaciones=festival["concursantes"]
+    )
 
 
 @app.route('/jugar')
