@@ -39,12 +39,12 @@ def mostrar_ediciones():
     paginacion = render_pagination(pagina, elementos_por_pagina, total_elementos, 'mostrar_ediciones')
 
     return render_template("mostrar_ediciones.html", festivales=festivales,
-                           pagination=paginacion, pagina=pagina)
+                            pagination=paginacion, pagina=pagina)
 
 
 @app.route("/edicion/<int:anyo>")
 def mostrar_festival(anyo: int):
-    # Mostrar la lista de ediciones, dado un anyo.
+    # Mostrar la lista de participaciones, dado un anyo.
     # Devuelve un error 404 si no se encuentra presente ese anyo.
     # Como respuesta, renderiza el template "mostrar_actuaciones_edicion.html"
     festival = mongo.db["festivales"].find_one({"anyo": anyo})
