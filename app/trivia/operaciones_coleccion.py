@@ -120,7 +120,7 @@ class OperacionesEurovision:
 
         return self._proyectar_y_sample("concursantes", n, condiciones_extras_modificadas)
 
-    def consulta(self, consulta: Dict[str, Any], opciones_proyeccion: List[Dict[str, Any]]) -> pymongo.cursor.Cursor:
+    def consulta(self, consulta: Dict[str, Any], opciones_proyeccion: Dict[str, Any]) -> pymongo.cursor.Cursor:
         """
         Consulta que devuelve los resultados directamente guardados en una lista,
         en lugar de tener que iterar sobre ellos

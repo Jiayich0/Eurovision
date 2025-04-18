@@ -71,12 +71,15 @@ class PrimerAnyoParticipacion(Trivia):
         self._opciones_invalidas = None
         self._respuesta = None
 
+    @property
     def pregunta(self) -> str:
         return f"¿En qué año participó por primera vez {self.pais}?"
 
+    @property
     def opciones_invalidas(self) -> List[str]:
         return self._opciones_invalidas
 
+    @property
     def respuesta(self) -> str:
         return self._respuesta
 
