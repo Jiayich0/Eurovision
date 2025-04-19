@@ -78,26 +78,25 @@ class PrimerAnyoParticipacion(Trivia):
         # es equivalente a sacar la lista, y de al lista sacar el [0], pero python me deja hacerlo directamente
 
         """ PAIS """
-        pais = participacion["pais"]
-
-        self.pais = pais
+        self.pais = participacion["pais"]
 
         """ RESPUESTA CORRECTA """
         participaciones = parametros.consulta(
-            {"concursantes.pais": pais},
+            {"concursantes.pais": self.pais},
             {"anyo":1, "_id":0}
         )
 
-        anyos = []
+        anyos = sorted(p["anyo"] for p in participaciones)  # más pythonic
+        """anyos = []
         for p in participaciones:
             anyos.append(p["anyo"])
-        anyos.sort()
+        anyos.sort()"""
 
         self._respuesta = str(anyos[0])
 
         """ RESPUESTAS INCORRECTAS """
-        condiciones = [{"$match": {"anyo": {"$ne": anyos[0]}}}]     # = where anyo != anyos[0]
-        invalidas = parametros.anyo_aleatorio(3, condiciones)
+        condicion = [{"$match": {"anyo": {"$ne": anyos[0]}}}]     # = where anyo != anyos[0]
+        invalidas = parametros.anyo_aleatorio(3, condicion)
 
         self._opciones_invalidas = [str(inv) for inv in invalidas]
 
@@ -121,6 +120,7 @@ class PrimerAnyoParticipacion(Trivia):
         """
         return 2
 
+
 class CancionPais(Trivia):
     """
     Pregunta de que pais es el interprete de una cancion, dada el titulo de la cancion
@@ -131,22 +131,16 @@ class CancionPais(Trivia):
         participacion = parametros.participacion_aleatoria(1)[0]
 
         """ CANCION """
-        cancion = participacion["cancion"]
+        self._cancion = participacion["cancion"]
 
         """ RESPUESTA CORRECTA """
-        participaciones = parametros.consulta(
-            {"concursantes.pais": pais},
-            {"anyo": 1, "_id": 0}
-        )
-        anyos = []
-        for p in participaciones:
-            anyos.append(p["anyo"])
-        anyos.sort()
+        self._respuesta = participacion["pais"]
 
         """ RESPUESTAS INCORRECTAS """
-        self._cancion = cancion
-        self._respuesta = None
-        self._opciones_invalidas = None
+        condicion = [{"$match": {"concursantes.pais": {"$ne": self._respuesta}}}]
+        invalidos = parametros.paises_participantes_aleatorios(3, condicion)
+
+        self._opciones_invalidas = invalidos
 
     @property
     def pregunta(self) -> str:
@@ -165,7 +159,7 @@ class CancionPais(Trivia):
         """
         Puntuacion asociada a la pregunta
         """
-        return 1
+        return 3
 
 
 class MejorClasificacion(Trivia):
@@ -178,6 +172,10 @@ class MejorClasificacion(Trivia):
     deben haber participado el mismo anyo.
     """
     def __init__(self, parametros: OperacionesEurovision):
+        participacion = parametros.participacion_aleatoria(1)[0]
+
+        """ CANCION """
+
         self._anyo = None
         self._opciones_invalidas = None
         self._respuesta = None
@@ -196,7 +194,7 @@ class MejorClasificacion(Trivia):
 
     @property
     def puntuacion(self) -> int:
-        return 3
+        return 1
 
 
 class MejorMediaPuntos(Trivia):
