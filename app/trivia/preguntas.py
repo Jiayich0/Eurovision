@@ -68,8 +68,39 @@ class PrimerAnyoParticipacion(Trivia):
     """
 
     def __init__(self, parametros: OperacionesEurovision):
-        self._opciones_invalidas = None
-        self._respuesta = None
+        """
+        Dada una <participacion>, se extrae el pais y se saca todas las <participaciones> de ese pais. Es un map/diccionario
+        {anyo:1999, anyo:...}, pero para ordenar necesito una lista: extraigo los años en una lista <anyos> [1999, ...] y
+        obtengo el año pillando el primero (sort: menor a mayor) de la lista. Importante, es un string no un int
+        """
+        participacion = parametros.participacion_aleatoria(1)[0]
+        # como devulve una lista de n elementos (n=1 en este caso) yo solo quiero el primer elemento, el 0, por eso [0]
+        # es equivalente a sacar la lista, y de al lista sacar el [0], pero python me deja hacerlo directamente
+
+        """ PAIS """
+        pais = participacion["pais"]
+
+        self.pais = pais
+
+        """ RESPUESTA CORRECTA """
+        participaciones = parametros.consulta(
+            {"concursantes.pais": pais},
+            {"anyo":1, "_id":0}
+        )
+
+        anyos = []
+        for p in participaciones:
+            anyos.append(p["anyo"])
+        anyos.sort()
+
+        self._respuesta = str(anyos[0])
+
+        """ RESPUESTAS INCORRECTAS """
+        condiciones = [{"$match": {"anyo": {"$ne": anyos[0]}}}]     # = where anyo != anyos[0]
+        invalidas = parametros.anyo_aleatorio(3, condiciones)
+
+        self._opciones_invalidas = [str(inv) for inv in invalidas]
+
 
     @property
     def pregunta(self) -> str:
@@ -90,7 +121,6 @@ class PrimerAnyoParticipacion(Trivia):
         """
         return 2
 
-
 class CancionPais(Trivia):
     """
     Pregunta de que pais es el interprete de una cancion, dada el titulo de la cancion
@@ -98,8 +128,24 @@ class CancionPais(Trivia):
 
     def __init__(self, parametros: OperacionesEurovision):
         # Obtenemos una participacion para la respuesta
+        participacion = parametros.participacion_aleatoria(1)[0]
+
+        """ CANCION """
+        cancion = participacion["cancion"]
+
+        """ RESPUESTA CORRECTA """
+        participaciones = parametros.consulta(
+            {"concursantes.pais": pais},
+            {"anyo": 1, "_id": 0}
+        )
+        anyos = []
+        for p in participaciones:
+            anyos.append(p["anyo"])
+        anyos.sort()
+
+        """ RESPUESTAS INCORRECTAS """
+        self._cancion = cancion
         self._respuesta = None
-        self._cancion = None
         self._opciones_invalidas = None
 
     @property

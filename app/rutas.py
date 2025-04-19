@@ -67,7 +67,7 @@ def mostrar_festival(anyo: int):
         participaciones=festival["concursantes"]
     )
 
-# TODO
+
 @app.route('/jugar')
 def jugar_quiz():
     # Jugar a un quiz. Esta funcion NO la teneis que modificar
