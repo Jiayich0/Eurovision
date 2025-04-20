@@ -3,7 +3,6 @@ from flask_bootstrap import Bootstrap5
 from flask_pymongo import PyMongo
 from flask_wtf import CSRFProtect
 from config import ConfiguracionFlask
-from flask_login import LoginManager
 
 # Los distintos objetos de la aplicacion se crean fuera del metodo create_app, para que esten
 # disponibles para importar del resto de paquetes.
