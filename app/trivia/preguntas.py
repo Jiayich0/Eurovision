@@ -96,9 +96,9 @@ class PrimerAnyoParticipacion(Trivia):
 
         """ RESPUESTAS INCORRECTAS """
         condicion = [{"$match": {"anyo": {"$ne": anyos[0]}}}]     # = where anyo != anyos[0]
-        invalidas = parametros.anyo_aleatorio(3, condicion)
+        invalidos = parametros.anyo_aleatorio(3, condicion)
 
-        self._opciones_invalidas = [str(inv) for inv in invalidas]
+        self._opciones_invalidas = [str(inv) for inv in invalidos]
 
 
     @property
@@ -174,11 +174,35 @@ class MejorClasificacion(Trivia):
     def __init__(self, parametros: OperacionesEurovision):
         participacion = parametros.participacion_aleatoria(1)[0]
 
-        """ CANCION """
+        """ AÑO """
+        anyo = parametros.consulta(
+            {"concursantes": participacion},
+            {"anyo": 1, "_id": 0}
+        ).next()
 
-        self._anyo = None
-        self._opciones_invalidas = None
-        self._respuesta = None
+        self._anyo = anyo["anyo"]   # creoq ue esto se puede hacer con agregate FIXME preguntar al profe
+
+        """ RESPUESTA CORRECTA """
+        edicion = parametros.consulta(
+            {"anyo": self._anyo},
+            {"concursantes.pais": 1, "concursantes.cancion": 1, "concursantes.resultado": 1, "_id":0}
+            # mas eficiente solo devuelvo los tres datos que quiero
+        ).next()    # devuelve un cursor, itera, pero queremos el primero y se hace .next (aunque solo haya uno)
+
+        concursantes = edicion["concursantes"]
+        concursantes.sort(key=lambda c: c["resultado"])
+        ganador = concursantes[0]
+
+        self._respuesta = ganador["cancion"] + "/" + ganador["pais"]
+
+        """ RESPUESTAS INCORRECTAS """
+        opciones = random.sample(concursantes[1:],3)
+        # sample genera unicos al azar (evita duplicados) y con concursantes[1:] exlcuye al primero (ganador)
+        invalidos = [f"{c['cancion']}/{c['pais']}" for c in opciones]
+        # moderno + pythonic. Mejor que [c["cancion"] + "/" + c["pais"] for c in opciones]
+        # al parecer es lo mismo c["pais"] que c['pais']. Comillas dobles o simples son iguales
+
+        self._opciones_invalidas = invalidos
 
     @property
     def pregunta(self) -> str:
