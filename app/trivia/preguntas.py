@@ -2,6 +2,7 @@
 Modulo que contiene diferentes modelos de consulta para la seccion de "trivia".
 """
 import random
+from statistics import median
 from typing import List
 from abc import ABC, abstractmethod
 from .operaciones_coleccion import OperacionesEurovision
@@ -196,9 +197,9 @@ class MejorClasificacion(Trivia):
         self._respuesta = ganador["cancion"] + "/" + ganador["pais"]
 
         """ RESPUESTAS INCORRECTAS """
-        opciones = random.sample(concursantes[1:],3)
+        otras_respuestas = random.sample(concursantes[1:],3)
         # sample genera unicos al azar (evita duplicados) y con concursantes[1:] exlcuye al primero (ganador)
-        invalidos = [f"{c['cancion']}/{c['pais']}" for c in opciones]
+        invalidos = [f"{o['cancion']}/{o['pais']}" for o in otras_respuestas]
         # moderno + pythonic. Mejor que [c["cancion"] + "/" + c["pais"] for c in opciones]
         # al parecer es lo mismo c["pais"] que c['pais']. Comillas dobles o simples son iguales
 
@@ -228,10 +229,32 @@ class MejorMediaPuntos(Trivia):
     IMPORTANTE: la solucion debe ser unica.
     """
     def __init__(self, parametros: OperacionesEurovision):
-        self._anyo_inicial = None
-        self._anyo_final = None
-        self._opciones_invalidas = None
-        self._respuesta = None
+        """ PERIODO """
+        anyos = parametros.anyo_aleatorio(2)
+        anyos.sort()
+        self._anyo_inicial = anyos[0]
+        self._anyo_final = anyos[1]
+
+        """ RESPUESTA CORRECTA """
+        participantes = parametros.agregacion([ #FIXME no entiendo el agregate
+            {"$match": {"anyo": {"$gte": self._anyo_inicial, "$lte": self._anyo_final}}},
+            {"$unwind": "$concursantes"},
+            {"$group": {
+                "_id": "$concursantes.pais",
+                "media_resultado": {"$avg": "$concursantes.resultado"}
+            }},
+            {"$sort": {"media_resultado": 1}},  # menor media = mejor país
+            {"$limit": 10}  # por ejemplo
+        ])
+        medias = list(participantes)
+
+        self._respuesta = medias[0]["_id"]
+
+        """ RESPUESTAS INCORRECTAS """
+        otros = [m["_id"] for m in medias[1:]]
+        invalidos = random.sample(otros, 3)
+        self._opciones_invalidas = invalidos
+
 
     @property
     def pregunta(self) -> str:
