@@ -241,9 +241,9 @@ class MejorMediaPuntos(Trivia):
             {"$unwind": "$concursantes"},
             {"$group": {
                 "_id": "$concursantes.pais",
-                "media_resultado": {"$avg": "$concursantes.resultado"}
+                "media_puntuacion": {"$avg": "$concursantes.puntuacion"}
             }},
-            {"$sort": {"media_resultado": 1}},  # menor media = mejor país
+            {"$sort": {"media_puntuacion": -1}},  # mayor a menor
             {"$limit": 10}  # por ejemplo
         ])
         medias = list(participantes)

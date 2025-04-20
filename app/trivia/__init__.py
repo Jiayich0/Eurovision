@@ -9,9 +9,17 @@ from .preguntas import CancionPais, Trivia, PrimerAnyoParticipacion, MejorClasif
 
 # Esta es la lista de preguntas posibles de trivia. Segun vayais resolviendolas,
 # id incluyendolas en esta lista.
-_preguntas_posibles = [] # [PrimerAnyoParticipacion, CancionPais, MejorClasificacion, MejorMediaPuntos,
-                         #  PaisActuacion, NombreCancion, InterpreteCancion ]
-
+_preguntas_posibles = [
+    # preguntas directas
+    #PrimerAnyoParticipacion,
+    #CancionPais,
+    #MejorClasificacion,
+    #MejorMediaPuntos,
+    # videos de YT
+    PaisActuacion,
+    #NombreCancion,
+    #InterpreteCancion
+]
 
 def generar_n_preguntas_aleatoriamente(n: int, anyos: List[int],
                                        paises: List[str], coleccion_eurovision) -> List[Trivia]:
