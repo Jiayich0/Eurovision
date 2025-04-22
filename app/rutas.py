@@ -37,9 +37,9 @@ def mostrar_ediciones():
     festivales = list(
         mongo.db["festivales"]
         .find({}, {"anyo":1, "ciudad":1, "pais":1, "fecha":1, "concursantes":1})
-        .sort("anyo", -1)               # Primero los ordena y luego hace el skip y limite por pagina
         .skip(skip)                     # Empiezan desde x pagina, cada 5 (paginate)
         .limit(elementos_por_pagina)    # 5 por pagina (paginate)
+        .sort("anyo", -1)               # Aunque esté el útlimo, pyhton primero hace el sort y luego el skip y limit
     )
 
     # Descomentad cuando cargueis la informacion
@@ -54,7 +54,7 @@ def mostrar_festival(anyo: int):
     # Mostrar la lista de participaciones, dado un anyo.
     # Devuelve un error 404 si no se encuentra presente ese anyo.
     # Como respuesta, renderiza el template "mostrar_actuaciones_edicion.html"
-    festival = mongo.db["festivales"].find_one({"anyo": anyo})
+    festival = mongo.db["festivales"].find_one({"anyo": anyo}, {"_id":0, "fecha":0, "anyo":0})
 
     if not festival:
         abort(404)
@@ -124,42 +124,42 @@ def mostrar_actuaciones_pais(id_pais: str):
     if not id_pais:     # el problema es que solo verifca que id no sea ni null ni vacio pero si un pais no existe? -> if not participaciones
         abort(404)
 
-    participaciones = []
-    nombre_pais = None
-    festivales = mongo.db["festivales"].find({}, {"anyo":1, "ciudad":1, "pais":1, "concursantes":1})
-    # o poner "fecha":0 pero no se si es del tod0 correcto
+    skip = (pagina - 1) * elementos_por_pagina
 
-    for festival in festivales:
-        anyo = festival["anyo"]
-        pais_host = festival["pais"]
-        ciudad = festival["ciudad"]
+    participaciones_agregacion = [                             # para entenderlo es como hacer una version plana de doc
+        {"$unwind": {"path": "$concursantes"}},                 # Deconstruyo mi array
+        {"$match": {"concursantes.id_pais": id_pais}},          # Wgere id = id
+        {"$sort": {"anyo":-1}},                                 # Descendente 2017>1999>1950
+        {"$skip": skip},
+        {"$limit": elementos_por_pagina},
+        {"$project": {
+            "_id": 0,                                           # exluey
+            "anyo": 1,                                          # incluye
+            "pais_organizador": "$pais",                        # se crea un campo para diferenciar e pais concursante
+            "ciudad": 1,
+            "artista": "$concursantes.artista",                 # se crea un campo para deconstruir el doc
+            "cancion": "$concursantes.cancion",
+            "resultado": "$concursantes.resultado",
+            "puntuacion": "$concursantes.puntuacion",
+            "url_youtube": "$concursantes.url_youtube",
+            "pais_nombre": "$concursantes.pais"
+        }}
+    ]
+    participaciones = list(mongo.db["festivales"].aggregate(participaciones_agregacion))
 
-        for concursante in festival["concursantes"]:
-            if concursante["id_pais"] == id_pais:
-                if nombre_pais is None:     # por pura eficiencia, si ya no es None deja de asignarle el nombre
-                    nombre_pais = concursante["pais"]
-
-                participaciones.append({
-                    "anyo": anyo,
-                    "pais_organizador": pais_host,
-                    "ciudad": ciudad,
-
-                    "artista": concursante["artista"],
-                    "cancion": concursante["cancion"],
-                    "resultado": concursante["resultado"],
-                    "puntuacion": concursante["puntuacion"],
-                    "url_youtube": concursante["url_youtube"]
-                })
-
-    if not participaciones: # pais dado no ha particiapdo en ningun año, "pais no existe"
+    if not participaciones:
         abort(404)
 
-    total_elementos = len(participaciones)
+    nombre_pais = participaciones[0]["pais_nombre"]
 
-    skip = (pagina - 1) * elementos_por_pagina
-    inicio = skip
-    fin = skip + elementos_por_pagina
-    participaciones = participaciones[inicio:fin]
+    conteo_agregacion = [
+        {"$unwind": "$concursantes"},
+        {"$match": {"concursantes.id_pais": id_pais}},
+        {"$count": "total"}
+    ]
+    conteo = list(mongo.db["festivales"].aggregate(conteo_agregacion))
+
+    total_elementos = conteo[0]["total"]
 
     # Descomentad cuando cargueis la informacion
     paginacion = render_pagination(pagina, elementos_por_pagina, total_elementos, 'mostrar_actuaciones_pais', id_pais=id_pais)

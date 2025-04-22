@@ -70,30 +70,26 @@ class PrimerAnyoParticipacion(Trivia):
 
     def __init__(self, parametros: OperacionesEurovision):
         """
-        Dada una <participacion>, se extrae el pais y se saca todas las <participaciones> de ese pais. Es un map/diccionario
+        Dada una <pais> aleatorio y se saca todas las <participaciones> de ese pais. Es un map/diccionario
         {anyo:1999, anyo:...}, pero para ordenar necesito una lista: extraigo los años en una lista <anyos> [1999, ...] y
         obtengo el año pillando el primero (sort: menor a mayor) de la lista. Importante, es un string no un int
         """
-        participacion = parametros.participacion_aleatoria(1)[0]
+        """ PAIS """
+        pais = parametros.paises_participantes_aleatorios(1)[0]
         # como devulve una lista de n elementos (n=1 en este caso) yo solo quiero el primer elemento, el 0, por eso [0]
         # es equivalente a sacar la lista, y de al lista sacar el [0], pero python me deja hacerlo directamente
-
-        """ PAIS """
-        self.pais = participacion["pais"]
+        self.pais = pais
 
         """ RESPUESTA CORRECTA """
-        participaciones = parametros.consulta(
-            {"concursantes.pais": self.pais},
-            {"anyo":1, "_id":0}
-        )
+        anyos_agregacion = [
+            {"$match": {"concursantes.pais": self.pais}},
+            {"project": {"anyo":1, "_id":0}},
+            {"$sort": {"anyo":1}},
+            {"$limit": 1}
+        ]
+        anyos = list(parametros.agregacion(anyos_agregacion))
 
-        anyos = sorted(p["anyo"] for p in participaciones)  # más pythonic
-        """anyos = []
-        for p in participaciones:
-            anyos.append(p["anyo"])
-        anyos.sort()"""
-
-        self._respuesta = str(anyos[0])
+        self._respuesta = str(anyos[0]["anyo"])
 
         """ RESPUESTAS INCORRECTAS """
         condicion = [{"$match": {"anyo": {"$ne": anyos[0]}}}]     # = where anyo != anyos[0]
@@ -236,19 +232,19 @@ class MejorMediaPuntos(Trivia):
         self._anyo_final = anyos[1]
 
         """ RESPUESTA CORRECTA """
-        participantes = parametros.agregacion([ #FIXME no entiendo el agregate
-            {"$match": {"anyo": {"$gte": self._anyo_inicial, "$lte": self._anyo_final}}},
-            {"$unwind": "$concursantes"},
+        medias_agregacon = parametros.agregacion([
+            {"$match": {"anyo": {"$gte": self._anyo_inicial, "$lte": self._anyo_final}}},   # where ...
+            {"$unwind": "$concursantes"},                                                   # descontruye concursantes
             {"$group": {
-                "_id": "$concursantes.pais",
+                "nombre_pais": "$concursantes.pais",
                 "media_puntuacion": {"$avg": "$concursantes.puntuacion"}
             }},
-            {"$sort": {"media_puntuacion": -1}},  # mayor a menor
-            {"$limit": 10}  # por ejemplo
+            {"$sort": {"media_puntuacion": -1}},
+            {"$limit": 1}
         ])
-        medias = list(participantes)
+        medias = list(medias_agregacon)
 
-        self._respuesta = medias[0]["_id"]
+        self._respuesta = medias[0]["nombre_pais"]
 
         """ RESPUESTAS INCORRECTAS """
         otros = [m["_id"] for m in medias[1:]]
