@@ -83,17 +83,20 @@ class PrimerAnyoParticipacion(Trivia):
         """ RESPUESTA CORRECTA """
         anyos_agregacion = [
             {"$match": {"concursantes.pais": self.pais}},
-            {"project": {"anyo":1, "_id":0}},
+            {"$project": {"anyo":1, "_id":0}},
             {"$sort": {"anyo":1}},
             {"$limit": 1}
         ]
         anyos = list(parametros.agregacion(anyos_agregacion))
-
-        self._respuesta = str(anyos[0]["anyo"])
+        anyo = anyos[0]["anyo"]
+        self._respuesta = str(anyo)
 
         """ RESPUESTAS INCORRECTAS """
-        condicion = [{"$match": {"anyo": {"$ne": anyos[0]}}}]     # = where anyo != anyos[0]
-        invalidos = parametros.anyo_aleatorio(3, condicion)
+        # otro métod válido
+        # condicion = [{"$match": {"anyo": {"$ne": anyo}}}]           # = where anyo != anyos[0] (anyo)
+        # invalidos = parametros.anyo_aleatorio(3, condicion)
+        anyos_int = [a["anyo"] for a in anyos]
+        invalidos = random.sample(anyos_int[1:], 3)
 
         self._opciones_invalidas = [str(inv) for inv in invalidos]
 
@@ -124,7 +127,6 @@ class CancionPais(Trivia):
     """
 
     def __init__(self, parametros: OperacionesEurovision):
-        # Obtenemos una participacion para la respuesta
         participacion = parametros.participacion_aleatoria(1)[0]
 
         """ CANCION """
@@ -236,7 +238,7 @@ class MejorMediaPuntos(Trivia):
             {"$match": {"anyo": {"$gte": self._anyo_inicial, "$lte": self._anyo_final}}},   # where ...
             {"$unwind": "$concursantes"},                                                   # descontruye concursantes
             {"$group": {
-                "nombre_pais": "$concursantes.pais",
+                "_id": "$concursantes.pais",
                 "media_puntuacion": {"$avg": "$concursantes.puntuacion"}
             }},
             {"$sort": {"media_puntuacion": -1}},
@@ -244,7 +246,7 @@ class MejorMediaPuntos(Trivia):
         ])
         medias = list(medias_agregacon)
 
-        self._respuesta = medias[0]["nombre_pais"]
+        self._respuesta = medias[0]["_id"]
 
         """ RESPUESTAS INCORRECTAS """
         otros = [m["_id"] for m in medias[1:]]

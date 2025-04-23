@@ -49,8 +49,13 @@ class PaisActuacion(TriviaVideo):
     """
     def __init__(self, parametros: OperacionesEurovision):
 
+        """ URL """
         self._url = None
+
+        """ RESPUESTA CORRECTA """
         self._respuesta = None
+
+        """ RESPUESTAS INCORRECTAS """
         self._opciones_invalidas = None
 
     @property
