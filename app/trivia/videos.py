@@ -48,15 +48,17 @@ class PaisActuacion(TriviaVideo):
     ¿Que pais represento la cancion?
     """
     def __init__(self, parametros: OperacionesEurovision):
+        participacion = parametros.participacion_aleatoria(1)[0]
 
         """ URL """
-        self._url = None
+        self._url = participacion["url_youtube"]
 
         """ RESPUESTA CORRECTA """
-        self._respuesta = None
+        self._respuesta = participacion["pais"]
 
         """ RESPUESTAS INCORRECTAS """
-        self._opciones_invalidas = None
+        condicion = [{"$match": {"concursantes.pais": {"$ne": self._respuesta}}}]
+        self._opciones_invalidas = parametros.paises_participantes_aleatorios(3, condicion)
 
     @property
     def url(self) -> str:

@@ -16,8 +16,8 @@ _preguntas_posibles = [
     #MejorClasificacion,
     #MejorMediaPuntos,
     # videos de YT
-    PaisActuacion,
-    #NombreCancion,
+    #PaisActuacion,
+    NombreCancion,
     #InterpreteCancion
 ]
 
