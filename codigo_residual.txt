@@ -1,0 +1,23 @@
+
+
+# TODO
+    Por que a veces tarda tanto y a veces tarda nada en cargar los videos
+
+
+    """ RESPUESTAS INCORRECTAS """
+    pipeline = [
+                {"$unwind": "$concursantes"},
+                {"$match": {
+                    "concursantes.pais": participacion["pais"],
+                    "concursantes.cancion":{"$ne": self._respuesta}}
+                },
+                {"$project": {"concursantes.cancion":1, "_id":0}}
+            ]
+    canciones_agregacion = list(parametros.agregacion(pipeline))
+    canciones = [c["concursantes"]["cancion"] for c in canciones_agregacion]
+
+    invalidas = random.sample(canciones, 3)
+    self._opciones_invalidas = invalidas
+
+
+    """ RESPUESTAS INCORRECTAS """
