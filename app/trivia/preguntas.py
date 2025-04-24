@@ -96,6 +96,8 @@ class PrimerAnyoParticipacion(Trivia):
         # condicion = [{"$match": {"anyo": {"$ne": anyo}}}]           # = where anyo != anyos[0] (anyo)
         # invalidos = parametros.anyo_aleatorio(3, condicion)
         anyos_int = [a["anyo"] for a in anyos]
+        if len(anyos_int) < 3:
+            raise ValueError("No hay suficientes respuestas incorrectas. No se ha generado una pregunta")
         invalidos = random.sample(anyos_int[1:], 3)
 
         self._opciones_invalidas = [str(inv) for inv in invalidos]
@@ -195,6 +197,8 @@ class MejorClasificacion(Trivia):
         self._respuesta = ganador["cancion"] + "/" + ganador["pais"]
 
         """ RESPUESTAS INCORRECTAS """
+        if len(concursantes) < 3:
+            raise ValueError("No hay suficientes respuestas incorrectas. No se ha generado una pregunta")
         otras_respuestas = random.sample(concursantes[1:],3)
         # sample genera unicos al azar (evita duplicados) y con concursantes[1:] exlcuye al primero (ganador)
         invalidos = [f"{o['cancion']}/{o['pais']}" for o in otras_respuestas]
@@ -250,6 +254,8 @@ class MejorMediaPuntos(Trivia):
 
         """ RESPUESTAS INCORRECTAS """
         otros = [m["_id"] for m in medias[1:]]
+        if len(otros) < 3:
+            raise ValueError("No hay suficientes respuestas incorrectas. No se ha generado una pregunta")
         invalidos = random.sample(otros, 3)
         self._opciones_invalidas = invalidos
 
