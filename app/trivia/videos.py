@@ -149,14 +149,29 @@ class InterpreteCancion(TriviaVideo):
     NOTA: para dificultar la respuesta, se deben seleccionar interpretes del mismo pais.
     """
     def __init__(self, parametros: OperacionesEurovision):
+        participacion = parametros.participacion_aleatoria(1)[0]
+
         """ URL """
+        self._url = participacion["url_youtube"]
 
         """ RESPUESTA CORRECTA """
+        self._respuesta = participacion["artista"]
 
         """ RESPUESTAS INCORRECTAS """
-        self._url = None
-        self._opciones_invalidas = None
-        self._respuesta = None
+        pipeline = [
+            {"$unwind": "$concursantes"},
+            {"$match": {
+                "concursantes.pais": participacion["pais"],
+                "concursantes.artista": {"$ne": self._respuesta}}
+            },
+            {"$sample": {"size": 3}},
+            {"$project": {"concursantes.artista": 1, "_id": 0}}
+        ]
+        canciones_agregacion = list(parametros.agregacion(pipeline))
+        canciones = [c["concursantes"]["artista"] for c in canciones_agregacion]
+
+        self._opciones_invalidas = canciones
+
 
     @property
     def url(self) -> str:

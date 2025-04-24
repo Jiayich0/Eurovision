@@ -11,14 +11,14 @@ from .preguntas import CancionPais, Trivia, PrimerAnyoParticipacion, MejorClasif
 # id incluyendolas en esta lista.
 _preguntas_posibles = [
     # preguntas directas
-    #PrimerAnyoParticipacion,
-    #CancionPais,
-    #MejorClasificacion,
-    #MejorMediaPuntos,
+    PrimerAnyoParticipacion,
+    CancionPais,
+    MejorClasificacion,
+    MejorMediaPuntos,
     # videos de YT
-    #PaisActuacion,
+    PaisActuacion,
     NombreCancion,
-    #InterpreteCancion
+    InterpreteCancion
 ]
 
 def generar_n_preguntas_aleatoriamente(n: int, anyos: List[int],
