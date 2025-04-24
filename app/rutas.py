@@ -1,7 +1,9 @@
 """
 Módulo de Python que contiene las rutas
 """
-import datetime
+
+from datetime import datetime
+from IPython.utils.tz import utcnow
 from flask import current_app as app, render_template, redirect, url_for, flash, abort, request
 from .formularios import GenerarQuizForm
 from . import mongo
@@ -83,7 +85,12 @@ def jugar_quiz():
     nombre = request.args.get("nombre", None)
     num_preguntas = 1
 
-    preguntas_aleatorias = generar_n_preguntas_aleatoriamente(num_preguntas, anyos, paises, mongo.db["festivales"])
+    try:
+        preguntas_aleatorias = generar_n_preguntas_aleatoriamente(num_preguntas, anyos, paises, mongo.db["festivales"])
+    except ValueError as e:
+        flash(str(e), "danger")
+        return redirect(url_for("generar_quiz"))
+
 
     preguntas = {"preguntas": [pregunta.to_dict() for pregunta in preguntas_aleatorias]}
 
@@ -93,7 +100,7 @@ def jugar_quiz():
 
     return render_template("juego.html", preguntas=preguntas, guardable=nombre is not None)
 
-# TODO
+
 @app.route('/quiz', methods=['GET', 'POST'])
 def generar_quiz():
     # Generacion de un quiz personalizado.
@@ -104,7 +111,31 @@ def generar_quiz():
     # Una vez el formulario se valide correctamente, debemos redireccionar a la funcion de vista
     # 'jugar_quiz', que debe recibir la lista de anyos (variable "anyos"), la lista de paises (variable "paises")
     # y el nombre del formulario (variable "nombre"). Estas variables se leen con request.args.get
-    abort(404)
+    pipeline_1 = [
+        {"$unwind": "$concursantes"},
+        {"$group": {"_id": "$anyo"}},
+        {"$sort": {"_id": -1}}
+    ]
+    anyos_agregacion = list(mongo.db["festivales"].aggregate(pipeline_1))
+    anyos = [a["_id"] for a in anyos_agregacion]
+
+    pipeline_2 = [
+        {"$unwind": "$concursantes"},
+        {"$group": {"_id": "$concursantes.pais"}},
+        {"$sort": {"_id": 1}}
+    ]
+    paises_agregacion = list(mongo.db["festivales"].aggregate(pipeline_2))
+    paises = [p["_id"] for p in paises_agregacion]
+
+    form = GenerarQuizForm(anyos, paises)
+    if form.validate_on_submit():
+        nombre = form.data["nombre"]
+        seleccion_anyos = form.data["seleccion_anyos"]
+        seleccion_paises = form.data["seleccion_paises"]
+        # FIXME para que quiero request.args.get?
+        return redirect(url_for('jugar_quiz', nombre=nombre, anyos=seleccion_anyos, paises=seleccion_paises))
+
+    return render_template("crear_quiz.html", form=form)
 
 
 @app.route("/pais/<id_pais>")
@@ -167,7 +198,7 @@ def mostrar_actuaciones_pais(id_pais: str):
     return render_template("mostrar_actuaciones_pais.html", pais=nombre_pais, participaciones=participaciones,
                            pagination=paginacion, pagina=pagina)
 
-# TODO
+
 @app.route("/upload_contest", methods=["POST"])
 def guardar_concurso():
     # Guarda un concurso personalizado.
@@ -187,6 +218,13 @@ def guardar_concurso():
     data = request.get_json()
 
     # AQUI VA VUESTRO CODIGO
+    if "preguntas" in data:
+        for pregunta in data["preguntas"]:  #gaurda todas las preguntas
+            if "seleccionado" in pregunta:
+                del pregunta["seleccionado"]
+
+    data["creacion"] = datetime.utcnow()
+    mongo.db["quizzes"].insert_one(data)
 
     # En este caso, no hacemos un redirect directamente porque desde JS no se reconoce
     # bien. En su lugar, devolvemos la respuesta en un json
