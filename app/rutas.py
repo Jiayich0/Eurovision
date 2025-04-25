@@ -262,11 +262,16 @@ def mostrar_quizzes():
     return render_template("listar_quizzes.html", quizzes=quizzes,
                             pagination=paginacion, pagina=pagina)
 
-# TODO
+
 @app.route("/jugar/<nombre_quiz>")
 def jugar_quiz_personalizado(nombre_quiz: str):
     # Juega a un quiz que ha sido creado previamente por un usuario
     # Primero, hay que comprobar un quiz con ese nombre en la coleccion
     # "quizzes". En tal caso, cargamos toda la informacion y renderizamos "juego.html".
     # Si no es asi, lanzamos un error 404.
-    abort(404)
+    quiz = mongo.db["quizzes"].find_one({"_id": nombre_quiz})
+
+    if not quiz:
+        abort(404)
+
+    return render_template("juego.html",preguntas=quiz, guardable=False)
