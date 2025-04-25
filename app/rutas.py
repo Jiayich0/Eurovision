@@ -56,7 +56,7 @@ def mostrar_festival(anyo: int):
     # Mostrar la lista de participaciones, dado un anyo.
     # Devuelve un error 404 si no se encuentra presente ese anyo.
     # Como respuesta, renderiza el template "mostrar_actuaciones_edicion.html"
-    festival = mongo.db["festivales"].find_one({"anyo": anyo}, {"_id":0, "fecha":0, "anyo":0})
+    festival = mongo.db["festivales"].find_one({"anyo": anyo}, {"_id":0, "fecha":0})
 
     if not festival:
         abort(404)
