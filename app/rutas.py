@@ -230,7 +230,7 @@ def guardar_concurso():
     # bien. En su lugar, devolvemos la respuesta en un json
     return {'redirect': url_for('mostrar_quizzes')}
 
-# TODO
+
 @app.route("/quizzes")
 def mostrar_quizzes():
     # Muestra la lista de quizzes en la aplicacion, utilizando una paginacion.
@@ -245,12 +245,22 @@ def mostrar_quizzes():
     # Numero de elementos por pagina
     elementos_por_pagina = 20
 
-    # Descomentad cuando cargueis la informacion
-    # paginacion = render_pagination(pagina, elementos_por_pagina, total_elementos, 'mostrar_quizzes')
+    # Codigo nostro
+    total_elementos = mongo.db["quizzes"].count_documents({})
+    skip = (pagina - 1) * elementos_por_pagina
+    quizzes = list(
+        mongo.db["quizzes"]
+        .find({}, {"creacion": 1})
+        .skip(skip)
+        .limit(elementos_por_pagina)
+        .sort("creacion", -1)
+    )
 
-    # return render_template("listar_quizzes.html", quizzes=quizzes,
-    #                        pagination=paginacion, pagina=pagina)
-    abort(404)
+    # Descomentad cuando cargueis la informacion
+    paginacion = render_pagination(pagina, elementos_por_pagina, total_elementos, 'mostrar_quizzes')
+
+    return render_template("listar_quizzes.html", quizzes=quizzes,
+                            pagination=paginacion, pagina=pagina)
 
 # TODO
 @app.route("/jugar/<nombre_quiz>")
